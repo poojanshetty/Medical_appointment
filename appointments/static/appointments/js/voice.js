@@ -1,0 +1,1 @@
+console.log('Voice booking feature disabled. Use the manual booking form instead.');

@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: shanthal - Dr. Sharma
+DTSTART:20260725T123000
+DTEND:20260725T133000
+DTSTAMP:20260725T204209Z
+DESCRIPTION:\n        Patient: shanthal\n        Age: 23\n        Gender: 
+ Female\n        Problem: ok\n        Contact: 99868857250 | poojaniranjans
+ hetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:pooja.ai.appointment@gmail.co
+ m
+END:VEVENT
+END:VCALENDAR

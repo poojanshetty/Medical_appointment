@@ -1,0 +1,82 @@
+{% extends 'appointments/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'appointments:index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'appointments:doctor_list' %}">Doctors</a></li>
+            <li class="breadcrumb-item active">Dr. {{ doctor.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-3">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3>Dr. {{ doctor.name }}</h3>
+                    <p><span class="badge bg-info">{{ doctor.specialization }}</span></p>
+                    <hr>
+                    <p><i class="fas fa-envelope me-2"></i>{{ doctor.email }}</p>
+                    <p><i class="fas fa-phone me-2"></i>{{ doctor.phone }}</p>
+                    <p><i class="fas fa-clock me-2"></i>
+                        {{ doctor.available_from|time:"h:i A" }} - {{ doctor.available_to|time:"h:i A" }}
+                    </p>
+                    <p><i class="fas fa-calendar-alt me-2"></i>
+                        {{ doctor.get_available_days_display }}
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'appointments:manual_booking' %}?doctor_id={{ doctor.id }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus me-2"></i>Book Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Appointments</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Problem</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appointments %}
+                                <tr>
+                                    <td>{{ appt.patient.name }}</td>
+                                    <td>{{ appt.appointment_date|date:"d/m/Y" }}</td>
+                                    <td>{{ appt.appointment_time|time:"h:i A" }}</td>
+                                    <td>{{ appt.problem_description|truncatechars:30 }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ appt.status }}">
+                                            {{ appt.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center text-muted">No appointments.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

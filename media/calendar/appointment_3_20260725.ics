@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Pooja Niranjana - Dr. Kumar
+DTSTART:20260725T100000
+DTEND:20260725T110000
+DTSTAMP:20260725T200034Z
+DESCRIPTION:\n        Patient: Pooja Niranjana\n        Age: 23\n        G
+ ender: Female\n        Problem: ok\n        Contact: 09916073885 | poojani
+ ranjanshetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR

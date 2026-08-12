@@ -109,9 +109,11 @@ EMAIL_HOST_USER = 'poojaniranjanshetty@gmail.com'
 EMAIL_HOST_PASSWORD = 'lbwt hfif ynxh fytg'
 
 # SMS settings (using Twilio or mock)
-TWILIO_ACCOUNT_SID = 'AC859fb1b67383fd99e14c5873f3f00670'
-TWILIO_AUTH_TOKEN = '97e54a2092c25d9b881b1d5f2fd6bf1e'
-TWILIO_PHONE_NUMBER = '+919916073885'
+import os
+
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 SMS_MOCK = True  # Set to False to use Twilio
 
 # App settings

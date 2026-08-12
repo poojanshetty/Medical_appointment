@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>New Appointment Notification</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #0a192f, #112d4e); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="margin: 0; font-size: 24px;">📋 New Appointment</h1>
+        <p style="margin: 5px 0 0; opacity: 0.8;">You have a new appointment request</p>
+    </div>
+
+    <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #0a192f;">Hello Dr. {{ doctor_name }}!</h2>
+        <p>A new appointment has been booked with you.</p>
+
+        <h3 style="color: #0a192f; margin-top: 20px;">Patient Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Name</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ patient_name }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Age</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ patient_age }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Gender</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ patient_gender }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Phone</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ patient_phone }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;"><strong>Email</strong></td>
+                <td style="padding: 8px;">{{ patient_email }}</td>
+            </tr>
+        </table>
+
+        <h3 style="color: #0a192f; margin-top: 20px;">Appointment Details</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Date</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ date }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;"><strong>Time</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ time }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;"><strong>Problem</strong></td>
+                <td style="padding: 8px;">{{ problem }}</td>
+            </tr>
+        </table>
+
+        <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+            <p style="margin: 0;"><strong>🆔 Appointment ID:</strong> #{{ appointment_id }}</p>
+        </div>
+
+        <div style="margin-top: 25px; text-align: center; color: #6c757d; font-size: 14px;">
+            <p>To view all your appointments, login to the admin dashboard.</p>
+        </div>
+    </div>
+</body>
+</html>

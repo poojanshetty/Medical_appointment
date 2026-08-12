@@ -1,0 +1,65 @@
+{% extends 'appointments/base.html' %}
+{% load static %}
+
+{% block title %}Appointment Confirmed{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-lg border-0 text-center">
+                <div class="card-body p-5">
+                    <div class="display-1 text-success mb-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 class="mb-3">Appointment Booked!</h2>
+                    <p class="text-muted mb-4">Your appointment has been successfully scheduled.</p>
+
+                    <table class="table table-borderless text-start">
+                        <tr>
+                            <td class="text-muted">Patient</td>
+                            <td class="fw-bold">{{ appointment.patient.name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Doctor</td>
+                            <td class="fw-bold">Dr. {{ appointment.doctor.name }} ({{ appointment.doctor.specialization }})</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Date</td>
+                            <td class="fw-bold">{{ appointment.appointment_date|date:"d/m/Y" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Time</td>
+                            <td class="fw-bold">{{ appointment.appointment_time|time:"h:i A" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Appointment ID</td>
+                            <td class="fw-bold">#{{ appointment.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Status</td>
+                            <td><span class="status-badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span></td>
+                        </tr>
+                    </table>
+
+                    <p class="text-muted small mt-3">
+                        <i class="fas fa-envelope me-1"></i> A confirmation email has been sent to {{ appointment.patient.email }}.
+                    </p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'appointments:download_ics' appointment.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-calendar-plus me-2"></i> Add to Calendar
+                        </a>
+                        <a href="{% url 'appointments:appointments_list' %}" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i> View All Appointments
+                        </a>
+                        <a href="{% url 'appointments:index' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

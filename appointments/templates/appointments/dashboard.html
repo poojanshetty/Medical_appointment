@@ -1,0 +1,155 @@
+/* /Users/triguna/Documents/Development/Projects/AI_medical_appointment/appointments/templates/appointments/dashboard.html */
+{% extends 'appointments/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-chart-bar me-2"></i>Dashboard</h2>
+        <div>
+            <a href="{% url 'appointments:export_page' %}" class="btn btn-success">
+                <i class="fas fa-file-excel me-2"></i>Export Reports
+            </a>
+            <a href="{% url 'appointments:manual_booking' %}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus me-2"></i>Manual Booking
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number text-primary">{{ stats.total }}</div>
+                <div class="stat-label">Total Appointments</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number text-success">{{ stats.confirmed }}</div>
+                <div class="stat-label">Confirmed</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number text-warning">{{ stats.pending }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-number text-info">{{ stats.today }}</div>
+                <div class="stat-label">Today's Appointments</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Today's Appointments -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Today's Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in today_appointments %}
+                                <tr>
+                                    <td>{{ appt.patient.name }}</td>
+                                    <td>Dr. {{ appt.doctor.name }}</td>
+                                    <td>{{ appt.appointment_time|time:"h:i A" }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ appt.status }}">
+                                            {{ appt.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No appointments scheduled for today.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming %}
+                    <div class="list-group list-group-flush">
+                        {% for appt in upcoming %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ appt.patient.name }}</strong><br>
+                                    <small>Dr. {{ appt.doctor.name }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">{{ appt.appointment_date|date:"d/m" }}</span>
+                                    <br>
+                                    <small>{{ appt.appointment_time|time:"h:i A" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor Stats -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="fas fa-user-md me-2"></i>Doctor Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Specialization</th>
+                            <th>Total Appointments</th>
+                            <th>Today</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in doctor_stats %}
+                        <tr>
+                            <td>Dr. {{ stat.doctor.name }}</td>
+                            <td>{{ stat.doctor.specialization }}</td>
+                            <td>{{ stat.total }}</td>
+                            <td>{{ stat.today }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted">No doctors available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

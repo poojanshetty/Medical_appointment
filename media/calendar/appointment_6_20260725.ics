@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Pooja Niranjan Shetty H N - Dr. Patel
+DTSTART:20260725T133000
+DTEND:20260725T143000
+DTSTAMP:20260725T201741Z
+DESCRIPTION:\n        Patient: Pooja Niranjan Shetty H N\n        Age: 45\
+ n        Gender: Other\n        Problem: fwedwe\n        Contact: 09916073
+ 885 | pooja.shettyherurniranjan@kpn.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR

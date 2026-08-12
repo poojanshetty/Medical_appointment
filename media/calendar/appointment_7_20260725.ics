@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Pooja Shetty - Dr. Singh
+DTSTART:20260725T143000
+DTEND:20260725T153000
+DTSTAMP:20260725T201900Z
+DESCRIPTION:\n        Patient: Pooja Shetty\n        Age: 12\n        Gend
+ er: Female\n        Problem: wedwdew\n        Contact: 09916073885 | pooja
+ niranjanshetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR

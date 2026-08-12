@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Niranjan - Dr. Joshi
+DTSTART:20260725T110000
+DTEND:20260725T120000
+DTSTAMP:20260725T200449Z
+DESCRIPTION:\n        Patient: Niranjan\n        Age: 23\n        Gender: 
+ Male\n        Problem: erwe\n        Contact: 628577224 | poojaniranjanshe
+ tty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR

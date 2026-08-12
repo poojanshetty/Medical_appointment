@@ -1,0 +1,63 @@
+/* /Users/triguna/Documents/Development/Projects/AI_medical_appointment/appointments/templates/appointments/export.html */
+{% extends 'appointments/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h2><i class="fas fa-file-excel me-2"></i>Export Reports</h2>
+    <p class="text-muted">Generate Excel reports for doctor appointments.</p>
+
+    <div class="row g-4 mt-3">
+        <!-- Export All -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center py-5">
+                    <div class="display-3 text-success mb-3">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <h4>Complete Report</h4>
+                    <p class="text-muted">Export all appointments across all doctors</p>
+                    <a href="{% url 'appointments:export_all_excel' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-download me-2"></i>Download All
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export by Doctor -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center py-5">
+                    <div class="display-3 text-primary mb-3">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h4>Doctor Report</h4>
+                    <p class="text-muted">Export appointments for a specific doctor</p>
+                    <div class="d-grid gap-2 mx-auto" style="max-width: 300px;">
+                        {% for doctor in doctors %}
+                        <a href="{% url 'appointments:export_doctor_excel' doctor.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-excel me-2"></i>Dr. {{ doctor.name }} ({{ doctor.specialization }})
+                        </a>
+                        {% empty %}
+                        <p class="text-muted">No doctors available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h6><i class="fas fa-info-circle text-primary me-2"></i>What's included in the Excel report?</h6>
+            <ul class="mb-0">
+                <li>Patient details: Name, Age, Gender, Phone, Email</li>
+                <li>Appointment details: Date, Time, Problem Description, Status</li>
+                <li>Booking method: Voice or Manual</li>
+                <li>Summary sheet with total appointments and doctor information</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Pooja Niranjan Shetty Herur Niranjan - Dr. Joshi
+DTSTART:20260725T093000
+DTEND:20260725T103000
+DTSTAMP:20260725T195345Z
+DESCRIPTION:\n        Patient: Pooja Niranjan Shetty Herur Niranjan\n     
+    Age: 29\n        Gender: Female\n        Problem: ok\n        Contact: 
+ 09916073885 | poojaniranjanshetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR

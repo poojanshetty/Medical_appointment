@@ -1,0 +1,162 @@
+{% extends 'appointments/base.html' %}
+{% load static %}
+
+{% block title %}Manual Booking - Medical Appointment{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-7 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0"><i class="fas fa-calendar-plus me-2"></i> Manual Appointment Booking</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'appointments:book_manual_appointment' %}" id="manualBookingForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Doctor <span class="text-danger">*</span></label>
+                            <select name="doctor_id" id="doctorSelect" class="form-select" required>
+                                <option value="">-- Select a doctor --</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}" {% if selected_doctor_id|stringformat:"s" == doctor.id|stringformat:"s" %}selected{% endif %}>
+                                    Dr. {{ doctor.name }} — {{ doctor.specialization }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Your Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Age <span class="text-danger">*</span></label>
+                                <input type="number" name="age" min="1" max="150" class="form-control" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Gender <span class="text-danger">*</span></label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="">--</option>
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                    <option value="O">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="text" name="phone" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Problem / Reason for Visit <span class="text-danger">*</span></label>
+                            <textarea name="problem" class="form-control" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" name="is_priority" id="isPriorityCheck" class="form-check-input">
+                            <label class="form-check-label" for="isPriorityCheck">
+                                <i class="fas fa-star text-warning me-1"></i> Priority booking (elderly, disabled, or urgent cases)
+                            </label>
+                            <div class="form-text">Priority bookings can reserve the doctor's first slot of the day.</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date <span class="text-danger">*</span></label>
+                                <input type="date" name="date" id="dateInput" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Time Slot <span class="text-danger">*</span></label>
+                                <select name="time" id="timeSelect" class="form-select" required>
+                                    <option value="">-- Select doctor and date first --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i> Book Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="mt-3 text-center">
+                <a href="{% url 'appointments:index' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="doctorListJson" value="{{ doctor_list_json|escape }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const doctorSelect = document.getElementById('doctorSelect');
+    const dateInput = document.getElementById('dateInput');
+    const timeSelect = document.getElementById('timeSelect');
+    const priorityCheck = document.getElementById('isPriorityCheck');
+
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+    dateInput.min = today.toISOString().split('T')[0];
+
+    async function loadSlots() {
+        const doctorId = doctorSelect.value;
+        const date = dateInput.value;
+        const isPriority = priorityCheck.checked;
+
+        if (!doctorId || !date) {
+            timeSelect.innerHTML = '<option value="">-- Select doctor and date first --</option>';
+            return;
+        }
+
+        timeSelect.innerHTML = '<option value="">Loading slots...</option>';
+
+        try {
+            const response = await fetch(`/api/doctor-slots/${doctorId}/?date=${date}&priority=${isPriority}`);
+            const data = await response.json();
+
+            if (data.slots && data.slots.length > 0) {
+                timeSelect.innerHTML = '<option value="">-- Select a time --</option>';
+                data.slots.forEach(function (slot) {
+                    const opt = document.createElement('option');
+                    opt.value = slot;
+                    opt.textContent = slot;
+                    timeSelect.appendChild(opt);
+                });
+            } else {
+                timeSelect.innerHTML = '<option value="">No slots available on this date</option>';
+            }
+        } catch (err) {
+            console.error('Failed to load slots:', err);
+            timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+        }
+    }
+
+    doctorSelect.addEventListener('change', loadSlots);
+    dateInput.addEventListener('change', loadSlots);
+    priorityCheck.addEventListener('change', loadSlots);
+
+    if (doctorSelect.value) {
+        loadSlots();
+    }
+});
+</script>
+{% endblock %}

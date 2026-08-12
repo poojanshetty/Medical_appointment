@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AI Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Triguna - Dr. Kumar
+DTSTART:20260725T120000
+DTEND:20260725T130000
+DTSTAMP:20260725T201510Z
+DESCRIPTION:\n        Patient: Triguna\n        Age: 1\n        Gender: Ma
+ le\n        Problem: adas\n        Contact: 09845891888 | poojaniranjanshe
+ tty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="AI Medical Appointment":MAILTO:admin@medicalapp.com
+END:VEVENT
+END:VCALENDAR
