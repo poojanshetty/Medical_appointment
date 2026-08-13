@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: shanthal - Dr. Kumar
+DTSTART:20260812T113000
+DTEND:20260812T123000
+DTSTAMP:20260812T171348Z
+DESCRIPTION:\n        Patient: shanthal\n        Age: 34\n        Gender: 
+ Female\n        Problem: dental\n        Contact: 99868857250 | poojaniran
+ janshetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="Medical Appointment":MAILTO:pooja.ai.appointment@gmail.com
+END:VEVENT
+END:VCALENDAR

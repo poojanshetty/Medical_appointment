@@ -29,7 +29,7 @@
                     <p><i class="fas fa-calendar-alt me-2"></i>
                         {{ doctor.get_available_days_display }}
                     </p>
-                    <div class="d-grid gap-2">
+                    <div class="d-grid gap-2 mt-3">
                         <a href="{% url 'appointments:manual_booking' %}?doctor_id={{ doctor.id }}" class="btn btn-primary">
                             <i class="fas fa-calendar-plus me-2"></i>Book Appointment
                         </a>
@@ -67,9 +67,50 @@
                                             {{ appt.get_status_display }}
                                         </span>
                                     </td>
+                                    <td>
+                                        <div class="d-grid gap-2">
+                                            <form method="post" action="{% url 'appointments:update_appointment_notes' appt.id %}">
+                                                {% csrf_token %}
+                                                <textarea name="notes" rows="2" class="form-control form-control-sm" placeholder="Patient history / condition...">{{ appt.notes|default:'' }}</textarea>
+                                                <button type="submit" class="btn btn-sm btn-outline-primary mt-2 w-100">Save Notes</button>
+                                            </form>
+                                            {% if appt.status == 'pending' %}
+                                            <form method="post" action="{% url 'appointments:confirm_appointment' appt.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-success btn-sm w-100">Confirm</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if appt.status == 'confirmed' %}
+                                            <form method="post" action="{% url 'appointments:complete_appointment' appt.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-info btn-sm w-100">Completed</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if appt.status == 'pending' or appt.status == 'confirmed' or appt.status == 'cancelled' or appt.status == 'rejected' or appt.status == 'rescheduled' %}
+                                            <form method="post" action="{% url 'appointments:cancel_appointment' appt.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger btn-sm w-100">Cancel</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if appt.status == 'pending' or appt.status == 'confirmed' or appt.status == 'cancelled' or appt.status == 'rejected' %}
+                                            <form method="post" action="{% url 'appointments:reject_appointment' appt.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-warning btn-sm w-100">Reject</button>
+                                            </form>
+                                            {% endif %}
+                                            {% if appt.status == 'cancelled' or appt.status == 'rejected' or appt.status == 'rescheduled' or appt.status == 'pending' or appt.status == 'confirmed' %}
+                                            <form method="post" action="{% url 'appointments:reschedule_appointment' appt.id %}">
+                                                {% csrf_token %}
+                                                <input type="date" name="new_date" value="{{ appt.appointment_date|date:'Y-m-d' }}" class="form-control form-control-sm mb-1" required>
+                                                <input type="time" name="new_time" value="{{ appt.appointment_time|time:'H:i' }}" class="form-control form-control-sm mb-1" required>
+                                                <button type="submit" class="btn btn-primary btn-sm w-100">Reschedule</button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% empty %}
-                                <tr><td colspan="5" class="text-center text-muted">No appointments.</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted">No appointments.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>

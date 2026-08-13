@@ -7,6 +7,9 @@ app_name = 'appointments'
 urlpatterns = [
     # Auth
     path('login/', auth_views.LoginView.as_view(template_name='appointments/login.html'), name='login'),
+    path('doctor-login/', views.DoctorLoginView.as_view(), name='doctor_login'),
+    path('customer-login/', views.CustomerLoginView.as_view(), name='customer_login'),
+    path('customer-register/', views.customer_register, name='customer_register'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     # Public pages
@@ -28,14 +31,18 @@ urlpatterns = [
     path('export/all/', views.export_all_excel, name='export_all_excel'),
     path('export/ics/<int:appointment_id>/', views.download_ics, name='download_ics'),
 
-    # Doctors
+    # Clinic and doctors
+    path('contact-clinic/', views.clinic_contact, name='clinic_contact'),
     path('doctors/', views.doctor_list, name='doctor_list'),
     path('doctors/<int:doctor_id>/', views.doctor_detail, name='doctor_detail'),
 
     # Appointments
     path('appointments/', views.appointments_list, name='appointments_list'),
     path('appointments/<int:appointment_id>/confirm/', views.confirm_appointment, name='confirm_appointment'),
+    path('appointments/<int:appointment_id>/complete/', views.complete_appointment, name='complete_appointment'),
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
+    path('appointments/<int:appointment_id>/reject/', views.reject_appointment, name='reject_appointment'),
     path('appointments/<int:appointment_id>/reschedule/', views.reschedule_appointment, name='reschedule_appointment'),
+    path('appointments/<int:appointment_id>/notes/', views.update_appointment_notes, name='update_appointment_notes'),
     path('appointments/<int:appointment_id>/confirmation/', views.booking_confirmation, name='booking_confirmation'),
 ]

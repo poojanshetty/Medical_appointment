@@ -1,0 +1,116 @@
+{% extends 'appointments/base.html' %}
+
+{% block content %}
+<div class="container py-5 contact-clinic-page">
+    <section class="clinic-hero mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="clinic-pill"><i class="fas fa-heart-pulse me-2"></i> Patient Support</span>
+                <h1 class="clinic-title">Speak with our care team</h1>
+                <p class="clinic-subtitle">We’re here to help with appointment questions, clinic support, and medical guidance. Reach us anytime during working hours.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a href="tel:{{ clinic.phone|cut:' '|cut:'('|cut:')'|cut:'-'|cut:'+' }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-phone me-2"></i> Call Now
+                    </a>
+                    <a href="https://wa.me/15550142026" target="_blank" rel="noopener" class="btn btn-success btn-lg">
+                        <i class="fab fa-whatsapp me-2"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="clinic-hero-card">
+                    <div class="mini-card">
+                        <span>Clinic Hotline</span>
+                        <strong>{{ clinic.phone }}</strong>
+                    </div>
+                    <div class="mini-card">
+                        <span>Email Support</span>
+                        <strong>{{ clinic.email }}</strong>
+                    </div>
+                    <div class="mini-card">
+                        <span>Opening Hours</span>
+                        <strong>{{ clinic.hours }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="contact-tile">
+                <div class="tile-icon"><i class="fas fa-envelope"></i></div>
+                <h5>Email</h5>
+                <p>{{ clinic.email }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="contact-tile">
+                <div class="tile-icon"><i class="fas fa-phone"></i></div>
+                <h5>Phone</h5>
+                <p>{{ clinic.phone }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="contact-tile">
+                <div class="tile-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h5>Address</h5>
+                <p>{{ clinic.address }}</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="contact-tile">
+                <div class="tile-icon"><i class="fas fa-clock"></i></div>
+                <h5>Hours</h5>
+                <p>{{ clinic.hours }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="panel-card form-panel">
+                <div class="panel-header">
+                    <h5><i class="fas fa-message me-2"></i>Send a quick message</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Full name</label>
+                            <input type="text" class="form-control" placeholder="Your name" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" placeholder="you@example.com" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" rows="5" placeholder="Tell us how we can help..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="panel-card map-panel">
+                <div class="panel-header">
+                    <h5><i class="fas fa-location-dot me-2"></i>Visit our clinic</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-box">
+                        <div class="map-pin"><i class="fas fa-map-pin"></i></div>
+                        <div class="map-overlay">
+                            <strong>MedCare Clinic</strong>
+                            <span>{{ clinic.address }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

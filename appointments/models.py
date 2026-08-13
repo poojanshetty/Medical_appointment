@@ -61,7 +61,7 @@ class Patient(models.Model):
     age = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(150)])
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     phone = models.CharField(max_length=15)
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -77,6 +77,7 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
+        ('rejected', 'Rejected'),
         ('rescheduled', 'Rescheduled'),
     ]
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')

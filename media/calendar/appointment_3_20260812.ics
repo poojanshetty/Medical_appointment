@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Niranjan - Dr. Sharma
+DTSTART:20260812T093000
+DTEND:20260812T103000
+DTSTAMP:20260812T164343Z
+DESCRIPTION:\n        Patient: Niranjan\n        Age: 43\n        Gender: 
+ Female\n        Problem: ok\n        Contact: 0651736450 | niranjanhg@gmai
+ l.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="Medical Appointment":MAILTO:pooja.ai.appointment@gmail.com
+END:VEVENT
+END:VCALENDAR

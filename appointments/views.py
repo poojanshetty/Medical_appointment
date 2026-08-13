@@ -1,11 +1,16 @@
 import json
 import logging
 from datetime import datetime, timedelta
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.models import User, Group
+from django.urls import reverse
 from django.utils import timezone
 from .models import Doctor, Patient, Appointment
 from .services import EmailService, SMSService, CalendarService, ExcelService
@@ -19,12 +24,126 @@ def is_doctor(user):
     return user.is_authenticated and user.groups.filter(name='Doctors').exists()
 
 
+def get_doctor_for_user(user):
+    """Resolve the doctor profile linked to the current doctor login."""
+    if not user or not user.is_authenticated or not is_doctor(user):
+        return None
+
+    doctor = Doctor.objects.filter(email__iexact=(user.email or '')).first()
+    if doctor:
+        return doctor
+
+    username_normalized = ''.join(ch for ch in (user.username or '').lower() if ch.isalnum())
+    if not username_normalized:
+        return None
+
+    for candidate in Doctor.objects.filter(is_active=True):
+        name_normalized = ''.join(ch for ch in candidate.name.lower() if ch.isalnum())
+        if not name_normalized:
+            continue
+        if username_normalized.endswith(name_normalized) or name_normalized.endswith(username_normalized) or username_normalized == name_normalized:
+            return candidate
+
+    return Doctor.objects.filter(name__icontains=user.username).first()
+
+
+class DoctorLoginView(LoginView):
+    """Doctor-only login page."""
+    template_name = 'appointments/doctor_login.html'
+    redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if not user.groups.filter(name='Doctors').exists():
+            form.add_error(None, 'This account is not registered as a doctor.')
+            return self.form_invalid(form)
+        login(self.request, user)
+        return redirect(self.get_success_url())
+
+
+class CustomerLoginView(LoginView):
+    """Customer login page for regular users."""
+    template_name = 'appointments/customer_login.html'
+    redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if user.groups.filter(name='Doctors').exists():
+            form.add_error(None, 'This account is for doctors. Please use the doctor login.')
+            return self.form_invalid(form)
+        login(self.request, user)
+        return redirect(self.get_success_url())
+
+
+def customer_register(request):
+    """Customer registration page for regular users."""
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        age = request.POST.get('age', '').strip()
+        gender = request.POST.get('gender', '').strip()
+        address = request.POST.get('address', '').strip()
+
+        if not all([username, email, password1, password2, name, phone, age, gender]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('appointments:customer_register')
+
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('appointments:customer_register')
+
+        if User.objects.filter(username__iexact=username).exists():
+            messages.error(request, 'This username is already taken.')
+            return redirect('appointments:customer_register')
+
+        if User.objects.filter(email__iexact=email).exists():
+            messages.error(request, 'This email is already registered.')
+            return redirect('appointments:customer_register')
+
+        user = User.objects.create_user(username=username, email=email, password=password1)
+        user.first_name = name.split()[0] if name else username
+        user.last_name = ' '.join(name.split()[1:]) if name else ''
+        user.save(update_fields=['first_name', 'last_name'])
+
+        customer_group, _ = Group.objects.get_or_create(name='Customers')
+        user.groups.add(customer_group)
+
+        Patient.objects.create(
+            name=name,
+            age=int(age),
+            gender=gender,
+            phone=phone,
+            email=email,
+            address=address,
+        )
+
+        login(request, user)
+        messages.success(request, 'Customer account created successfully.')
+        return redirect('appointments:manual_booking')
+
+    return render(request, 'appointments/customer_register.html')
+
+
 def index(request):
     """Home page."""
     doctors = Doctor.objects.filter(is_active=True)
-    recent_appointments = Appointment.objects.filter(
-        status__in=['confirmed', 'pending']
-    ).order_by('-created_at')[:10]
+
+    is_customer = request.user.is_authenticated and not is_doctor(request.user)
+
+    if is_customer:
+        patient = Patient.objects.filter(email__iexact=request.user.email).first()
+        if patient:
+            recent_appointments = Appointment.objects.filter(patient=patient).order_by('-created_at')[:10]
+        else:
+            recent_appointments = Appointment.objects.none()
+    else:
+        recent_appointments = Appointment.objects.filter(
+            status__in=['confirmed', 'pending']
+        ).order_by('-created_at')[:10]
 
     stats = get_appointment_stats()
 
@@ -32,8 +151,26 @@ def index(request):
         'doctors': doctors,
         'recent_appointments': recent_appointments,
         'stats': stats,
+        'is_doctor': is_doctor(request.user),
+        'is_customer': is_customer,
     }
     return render(request, 'appointments/index.html', context)
+
+
+def clinic_contact(request):
+    """Public clinic contact page with contact details."""
+    clinic = {
+        'name': 'MedCare Clinic',
+        'email': 'care@medcareclinic.com',
+        'phone': '+1 (555) 014-2026',
+        'address': '45 Health Avenue, Suite 220, New York, NY',
+        'hours': 'Mon - Sat: 9:00 AM - 7:00 PM',
+    }
+    context = {
+        'clinic': clinic,
+        'is_doctor': is_doctor(request.user),
+    }
+    return render(request, 'appointments/clinic_contact.html', context)
 
 
 def voice_booking(request):
@@ -125,13 +262,21 @@ def voice_book_appointment(request):
                 'error': f'Slot already booked with Dr. {doctor.name} on {appointment_date} at {appointment_time}.'
             }, status=400)
 
-        patient = Patient.objects.create(
-            name=name,
-            age=int(age),
-            gender=gender[0].upper() if gender else 'M',
-            phone=phone,
-            email=email
-        )
+        patient = Patient.objects.filter(email__iexact=email).first()
+        if patient is None:
+            patient = Patient.objects.create(
+                name=name,
+                age=int(age),
+                gender=gender[0].upper() if gender else 'M',
+                phone=phone,
+                email=email,
+            )
+        else:
+            patient.name = name
+            patient.age = int(age)
+            patient.gender = gender[0].upper() if gender else patient.gender
+            patient.phone = phone
+            patient.save(update_fields=['name', 'age', 'gender', 'phone'])
 
         appointment = Appointment.objects.create(
             patient=patient,
@@ -283,31 +428,65 @@ def dashboard(request):
     return render(request, 'appointments/dashboard.html', context)
 
 
+@login_required
 def doctor_list(request):
-    """List all doctors."""
-    doctors = Doctor.objects.filter(is_active=True)
-    return render(request, 'appointments/doctor_list.html', {'doctors': doctors})
+    """Contact page by role: doctors see customer contacts, customers are redirected away."""
+    if not request.user.is_authenticated:
+        return redirect('appointments:index')
+
+    if is_doctor(request.user):
+        doctor = get_doctor_for_user(request.user)
+        if not doctor:
+            return redirect('appointments:index')
+
+        patients = Patient.objects.filter(appointments__doctor=doctor).distinct().order_by('name')
+        context = {
+            'patients': patients,
+            'doctors': [],
+            'is_doctor': True,
+            'show_customer_contacts': True,
+        }
+        return render(request, 'appointments/doctor_list.html', context)
+
+    return redirect('appointments:index')
 
 
+@login_required
+@user_passes_test(is_doctor)
 def doctor_detail(request, doctor_id):
-    """Doctor detail with appointments."""
+    """Doctor detail with appointments. Restricted to doctors only."""
     doctor = get_object_or_404(Doctor, id=doctor_id)
     appointments = doctor.appointments.all().order_by('-appointment_date', '-appointment_time')
 
     context = {
         'doctor': doctor,
         'appointments': appointments,
+        'is_doctor': True,
+        'logged_doctor': get_doctor_for_user(request.user),
     }
     return render(request, 'appointments/doctor_detail.html', context)
 
 
+@login_required
 def appointments_list(request):
-    """List all appointments with filters."""
+    """List appointments; doctors see all assigned bookings, customers see only their own."""
     status_filter = request.GET.get('status', '')
     doctor_filter = request.GET.get('doctor', '')
     date_filter = request.GET.get('date', '')
 
     appointments = Appointment.objects.all().order_by('-appointment_date', '-appointment_time')
+
+    if is_doctor(request.user):
+        logged_doctor = get_doctor_for_user(request.user)
+        if logged_doctor:
+            appointments = appointments.filter(doctor=logged_doctor)
+            doctor_filter = str(logged_doctor.id)
+    else:
+        patient = Patient.objects.filter(email__iexact=request.user.email).first()
+        if patient:
+            appointments = appointments.filter(patient=patient)
+        else:
+            appointments = appointments.none()
 
     if status_filter:
         appointments = appointments.filter(status=status_filter)
@@ -327,6 +506,7 @@ def appointments_list(request):
         'doctor_filter': doctor_filter,
         'date_filter': date_filter,
         'is_doctor': is_doctor(request.user),
+        'logged_doctor': get_doctor_for_user(request.user) if is_doctor(request.user) else None,
     }
     return render(request, 'appointments/appointments_list.html', context)
 
@@ -376,6 +556,11 @@ def download_ics(request, appointment_id):
 def confirm_appointment(request, appointment_id):
     """Confirm an appointment."""
     appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
     appointment.status = 'confirmed'
     appointment.confirmed_at = timezone.now()
     appointment.save()
@@ -390,9 +575,36 @@ def confirm_appointment(request, appointment_id):
 @login_required
 @user_passes_test(is_doctor)
 @require_http_methods(['POST'])
+def complete_appointment(request, appointment_id):
+    """Mark an appointment as completed and save any doctor's notes/history."""
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
+    notes = request.POST.get('notes', '').strip()
+    if notes:
+        appointment.notes = notes
+
+    appointment.status = 'completed'
+    appointment.save(update_fields=['notes', 'status'])
+
+    messages.success(request, f'Appointment marked as completed for {appointment.patient.name}.')
+    return redirect('appointments:appointments_list')
+
+
+@login_required
+@user_passes_test(is_doctor)
+@require_http_methods(['POST'])
 def cancel_appointment(request, appointment_id):
     """Cancel an appointment."""
     appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
     appointment.status = 'cancelled'
     appointment.save()
 
@@ -402,10 +614,35 @@ def cancel_appointment(request, appointment_id):
     return redirect('appointments:appointments_list')
 
 
+@login_required
+@user_passes_test(is_doctor)
+@require_http_methods(['POST'])
+def reject_appointment(request, appointment_id):
+    """Reject an appointment and keep it visible in the list for the doctor."""
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
+    appointment.status = 'rejected'
+    appointment.save()
+
+    messages.warning(request, f'Appointment rejected for {appointment.patient.name}.')
+    return redirect('appointments:appointments_list')
+
+
+@login_required
+@user_passes_test(is_doctor)
 @require_http_methods(['POST'])
 def reschedule_appointment(request, appointment_id):
-    """Reschedule an appointment."""
+    """Reschedule an appointment; cancelled/rejected appointments can be moved again."""
     appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
     new_date_str = request.POST.get('new_date')
     new_time_str = request.POST.get('new_time')
 
@@ -424,14 +661,14 @@ def reschedule_appointment(request, appointment_id):
             doctor=appointment.doctor,
             appointment_date=new_date,
             appointment_time=new_time,
-            status__in=['pending', 'confirmed']
+            status__in=['pending', 'confirmed', 'rescheduled']
     ).exclude(id=appointment.id).exists():
         messages.error(request, 'New slot is already booked.')
         return redirect('appointments:appointments_list')
 
     appointment.appointment_date = new_date
     appointment.appointment_time = new_time
-    appointment.status = 'rescheduled'
+    appointment.status = 'pending' if appointment.status in ['cancelled', 'rejected', 'rescheduled'] else 'rescheduled'
     appointment.save()
 
     EmailService.send_appointment_confirmation(appointment)
@@ -441,11 +678,34 @@ def reschedule_appointment(request, appointment_id):
     return redirect('appointments:appointments_list')
 
 
+@login_required
+@user_passes_test(is_doctor)
+@require_http_methods(['POST'])
+def update_appointment_notes(request, appointment_id):
+    """Save patient condition/notes for an appointment."""
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    logged_doctor = get_doctor_for_user(request.user)
+    if logged_doctor and appointment.doctor.id != logged_doctor.id:
+        messages.error(request, 'You can only manage your own appointments.')
+        return redirect('appointments:appointments_list')
+
+    notes = request.POST.get('notes', '').strip()
+    appointment.notes = notes
+    appointment.save(update_fields=['notes'])
+    messages.success(request, f'Condition notes saved for {appointment.patient.name}.')
+    return redirect('appointments:appointments_list')
+
+
+@login_required
 def manual_booking(request):
     """
     Manual appointment booking page with calendar and time slot selection.
     Supports pre-selecting a doctor via ?doctor_id=<id> (e.g. from the doctor's profile page).
     """
+    if is_doctor(request.user):
+        messages.error(request, 'Doctors cannot book appointments from the customer panel.')
+        return redirect('appointments:dashboard')
+
     doctors = Doctor.objects.filter(is_active=True)
 
     doctor_list = [
@@ -465,38 +725,52 @@ def manual_booking(request):
         'doctors': doctors,
         'doctor_list_json': json.dumps(doctor_list),
         'selected_doctor_id': selected_doctor_id,
+        'is_doctor': is_doctor(request.user),
     }
     return render(request, 'appointments/manual_booking.html', context)
 
 
+@login_required
 @csrf_exempt
 @require_http_methods(['POST'])
 def book_manual_appointment(request):
     """
     API endpoint for manual booking from the form.
     """
+    if is_doctor(request.user):
+        return JsonResponse({'success': False, 'error': 'Doctors cannot book from the customer flow.'}, status=403)
+
     try:
         doctor_id = request.POST.get('doctor_id')
-        name = request.POST.get('name', '').strip()
-        age = request.POST.get('age', '').strip()
-        gender = request.POST.get('gender', '').strip()
         problem = request.POST.get('problem', '').strip()
         date_str = request.POST.get('date', '').strip()
         time_str = request.POST.get('time', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        email = request.POST.get('email', '').strip()
         is_priority = request.POST.get('is_priority') == 'on'
+
+        if request.user.is_authenticated:
+            patient = Patient.objects.filter(email__iexact=request.user.email).first()
+            if patient is None:
+                patient = Patient.objects.filter(name__iexact=request.user.get_full_name() or request.user.username).first()
+            if patient is None:
+                messages.error(request, 'Customer profile not found. Please register again.')
+                return redirect('appointments:customer_register')
+            name = patient.name
+            age = patient.age
+            gender = patient.gender
+            phone = patient.phone
+            email = patient.email
+        else:
+            name = ''
+            age = ''
+            gender = ''
+            phone = ''
+            email = ''
 
         missing_fields = []
         if not doctor_id: missing_fields.append('doctor')
-        if not name: missing_fields.append('name')
-        if not age: missing_fields.append('age')
-        if not gender: missing_fields.append('gender')
         if not problem: missing_fields.append('problem')
         if not date_str: missing_fields.append('date')
         if not time_str: missing_fields.append('time')
-        if not phone: missing_fields.append('phone')
-        if not email: missing_fields.append('email')
 
         if missing_fields:
             messages.error(request, f'Missing fields: {", ".join(missing_fields)}')
@@ -528,13 +802,21 @@ def book_manual_appointment(request):
             messages.error(request, 'Slot is no longer available. Please select another time.')
             return redirect('appointments:manual_booking')
 
-        patient = Patient.objects.create(
-            name=name,
-            age=int(age),
-            gender=gender[0].upper() if gender else 'M',
-            phone=phone,
-            email=email
-        )
+        patient = Patient.objects.filter(email__iexact=email).first()
+        if patient is None:
+            patient = Patient.objects.create(
+                name=name,
+                age=int(age),
+                gender=gender[0].upper() if gender else 'M',
+                phone=phone,
+                email=email,
+            )
+        else:
+            patient.name = name
+            patient.age = int(age)
+            patient.gender = gender[0].upper() if gender else patient.gender
+            patient.phone = phone
+            patient.save(update_fields=['name', 'age', 'gender', 'phone'])
 
         appointment = Appointment.objects.create(
             patient=patient,

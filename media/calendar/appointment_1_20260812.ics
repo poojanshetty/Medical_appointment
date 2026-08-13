@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Pooja Niranjan Shetty Herur Niranjan - Dr. Kumar
+DTSTART:20260812T100000
+DTEND:20260812T110000
+DTSTAMP:20260812T163535Z
+DESCRIPTION:\n        Patient: Pooja Niranjan Shetty Herur Niranjan\n     
+    Age: 29\n        Gender: Female\n        Problem: ok\n        Contact: 
+ 09916073885 | poojaniranjanshetty@gmail.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="Medical Appointment":MAILTO:pooja.ai.appointment@gmail.com
+END:VEVENT
+END:VCALENDAR

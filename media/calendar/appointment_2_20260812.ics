@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Triguna - Dr. Patel
+DTSTART:20260812T090000
+DTEND:20260812T100000
+DTSTAMP:20260812T163838Z
+DESCRIPTION:\n        Patient: Triguna\n        Age: 23\n        Gender: M
+ ale\n        Problem: ok\n        Contact: 09845891888 | trigun.rvce@gmail
+ .com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="Medical Appointment":MAILTO:pooja.ai.appointment@gmail.com
+END:VEVENT
+END:VCALENDAR

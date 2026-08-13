@@ -1,76 +1,435 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Medical Appointment{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'appointments/css/style.css' %}">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Modern medical appointment booking and healthcare management system">
+
+    <meta name="theme-color"
+          content="#0f172a">
+
+    <title>
+        {% block title %}Medical Appointment{% endblock %}
+    </title>
+
+
+    <!-- Bootstrap 5 -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+
+    <!-- Application CSS -->
+    <link
+        rel="stylesheet"
+        href="{% static 'appointments/css/style.css' %}"
+    >
+
+
+    {% block extra_css %}
+    {% endblock %}
+
 </head>
+
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #0a192f, #112d4e);">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'appointments:index' %}">
-                <i class="fas fa-hospital me-2"></i>Medical Appointment
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'appointments:index' %}"><i class="fas fa-home"></i> Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'appointments:manual_booking' %}"><i class="fas fa-calendar-plus"></i> Manual Booking</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'appointments:doctor_list' %}"><i class="fas fa-user-md"></i> Doctors</a></li>
+
+
+<!-- =========================================================
+     NAVIGATION
+     ========================================================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark premium-nav">
+
+    <div class="container">
+
+
+        <!-- Brand -->
+
+        <a
+            class="navbar-brand d-flex align-items-center gap-2"
+            href="{% url 'appointments:index' %}"
+        >
+
+            <span class="brand-icon">
+                <i class="fas fa-heart-pulse"></i>
+            </span>
+
+            <span>
+                Medical Appointment
+            </span>
+
+        </a>
+
+
+        <!-- Mobile Menu Button -->
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+
+            <span class="navbar-toggler-icon"></span>
+
+        </button>
+
+
+        <!-- Navigation -->
+
+        <div
+            class="collapse navbar-collapse"
+            id="navbarNav"
+        >
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
+
+                <!-- Home -->
+
+                <li class="nav-item">
+
+                    <a
+                        class="nav-link"
+                        href="{% url 'appointments:index' %}"
+                    >
+
+                        <i class="fas fa-house"></i>
+
+                        <span>
+                            Home
+                        </span>
+
+                    </a>
+
+                </li>
+
+
+                {% if user.is_authenticated %}
+
 
                     {% if is_doctor %}
-                    <li class="nav-item"><a class="nav-link" href="{% url 'appointments:dashboard' %}"><i class="fas fa-chart-bar"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'appointments:appointments_list' %}"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+
+                        <!-- Contact -->
+
+                        <li class="nav-item">
+
+                            <a
+                                class="nav-link"
+                        href="{% url 'appointments:clinic_contact' %}"
+                                <i class="fas fa-phone"></i>
+
+                                <span>
+                                    Contact Clinic
+                                </span>
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- Dashboard -->
+
+                        <li class="nav-item">
+
+                            <a
+                                class="nav-link"
+                                href="{% url 'appointments:dashboard' %}"
+                            >
+
+                                <i class="fas fa-chart-line"></i>
+
+                                <span>
+                                    Dashboard
+                                </span>
+
+                            </a>
+
+                        </li>
+
                     {% endif %}
 
-                    {% if user.is_authenticated %}
+
+                    <!-- Logged-in User -->
+
                     <li class="nav-item">
-                        <form method="post" action="{% url 'appointments:logout' %}" class="d-inline">
+
+                        <span
+                            class="nav-link"
+                            style="cursor: default;"
+                        >
+
+                            <i class="fas fa-circle-user"></i>
+
+                            <span>
+                                {{ user.username }}
+                            </span>
+
+                        </span>
+
+                    </li>
+
+
+                    <!-- Logout -->
+
+                    <li class="nav-item">
+
+                        <form
+                            method="post"
+                            action="{% url 'appointments:logout' %}"
+                            class="d-inline"
+                        >
+
                             {% csrf_token %}
-                            <button type="submit" class="nav-link btn btn-link" style="border: none; background: none; padding-top: 0.5rem;">
-                                <i class="fas fa-sign-out-alt"></i> Logout ({{ user.username }})
+
+                            <button
+                                type="submit"
+                                class="nav-link btn btn-link logout-btn"
+                            >
+
+                                <i class="fas fa-right-from-bracket"></i>
+
+                                <span>
+                                    Logout
+                                </span>
+
                             </button>
+
                         </form>
+
                     </li>
-                    {% else %}
+
+
+                {% else %}
+
+
+                    <!-- Doctor Login -->
+
                     <li class="nav-item">
-                        <a class="nav-link fw-bold" href="{% url 'appointments:login' %}" style="color: #ffd166;">
-                            <i class="fas fa-sign-in-alt"></i> Doctor Login
+
+                        <a
+                            class="nav-link nav-doctor-login"
+                            href="{% url 'appointments:doctor_login' %}"
+                        >
+
+                            <i class="fas fa-user-doctor"></i>
+
+                            <span>
+                                Doctor Login
+                            </span>
+
                         </a>
+
                     </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <main>
-        {% if messages %}
-        <div class="container mt-3">
+
+                {% endif %}
+
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+     ========================================================= -->
+
+<main>
+
+
+    <!-- Django Messages -->
+
+    {% if messages %}
+
+        <div class="container mt-4">
+
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+
+                <div
+                    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+                    role="alert"
+                >
+
+                    {% if message.tags == "success" %}
+
+                        <i class="fas fa-circle-check me-2"></i>
+
+                    {% elif message.tags == "error" or message.tags == "danger" %}
+
+                        <i class="fas fa-circle-exclamation me-2"></i>
+
+                    {% elif message.tags == "warning" %}
+
+                        <i class="fas fa-triangle-exclamation me-2"></i>
+
+                    {% elif message.tags == "info" %}
+
+                        <i class="fas fa-circle-info me-2"></i>
+
+                    {% endif %}
+
+                    {{ message }}
+
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"
+                    ></button>
+
+                </div>
+
             {% endfor %}
-        </div>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
 
-    <footer class="footer mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">© 2026 Medical Appointment System. Made with <i class="fas fa-heart text-danger"></i></span>
         </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block extra_js %}{% endblock %}
+    {% endif %}
+
+
+    <!-- Page Content -->
+
+    {% block content %}
+    {% endblock %}
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+
+<footer class="footer mt-5">
+
+    <div class="container">
+
+        <div class="row py-4 align-items-center">
+
+
+            <!-- Brand -->
+
+            <div class="col-md-6 text-center text-md-start">
+
+                <div
+                    class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-2"
+                >
+
+                    <span class="brand-icon"
+                          style="width: 34px; height: 34px; border-radius: 10px;">
+
+                        <i class="fas fa-heart-pulse"></i>
+
+                    </span>
+
+                    <strong class="text-dark">
+                        Medical Appointment
+                    </strong>
+
+                </div>
+
+                <p class="text-muted small mb-0">
+                    Making healthcare appointments simpler and more accessible.
+                </p>
+
+            </div>
+
+
+            <!-- Copyright -->
+
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+
+                <p class="text-muted small mb-1">
+
+                    © {% now "Y" %}
+                    Medical Appointment System.
+
+                </p>
+
+                <p class="text-muted small mb-0">
+
+                    Made with
+                    <i class="fas fa-heart text-danger"></i>
+                    for better healthcare.
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="border-top pt-3 pb-3">
+
+            <div class="text-center">
+
+                <span class="text-muted small">
+
+                    Secure appointments
+                    <span class="mx-2">•</span>
+
+                    Trusted care
+                    <span class="mx-2">•</span>
+
+                    Simple scheduling
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =========================================================
+     BOOTSTRAP JAVASCRIPT
+     ========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+></script>
+
+
+<!-- =========================================================
+     APPLICATION JAVASCRIPT
+     ========================================================= -->
+
+{% block extra_js %}
+{% endblock %}
+
+
 </body>
+
 </html>

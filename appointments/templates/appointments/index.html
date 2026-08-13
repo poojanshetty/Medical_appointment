@@ -2,69 +2,90 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-12 text-center mb-5">
-            <h1 class="display-4 fw-bold" style="color: #0a192f;">
-                <i class="fas fa-stethoscope text-primary"></i> Medical Appointment
-            </h1>
-            <p class="lead">Book an appointment quickly using the manual form below.</p>
-
-            <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
-                <a href="{% url 'appointments:manual_booking' %}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-calendar-plus me-2"></i> Book Appointment
-                </a>
+<div class="container py-4 home-shell">
+    <section class="hero-panel mb-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="hero-badge"><i class="fas fa-heartbeat me-2"></i> Trusted care, smarter scheduling</span>
+                <h1 class="hero-title">Healthcare that feels personal, fast, and modern.</h1>
+                <p class="hero-subtitle">Book appointments with top specialists, manage your care journey, and stay connected with your clinic in one clean dashboard.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    {% if user.is_authenticated and not is_doctor %}
+                    <a href="{% url 'appointments:manual_booking' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calendar-plus me-2"></i> Book Appointment
+                    </a>
+                    {% elif not user.is_authenticated %}
+                    <a href="{% url 'appointments:customer_login' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calendar-plus me-2"></i> Book Appointment
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'appointments:clinic_contact' %}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-phone me-2"></i> Contact Clinic
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="feature-card">
+                    <div class="feature-header">
+                        <span class="feature-pill"><i class="fas fa-shield-heart me-2"></i> Care Team</span>
+                    </div>
+                    <div class="feature-content">
+                        <div class="mini-stat">
+                            <strong>{{ stats.total_doctors }}</strong>
+                            <span>Doctors</span>
+                        </div>
+                        <div class="mini-stat">
+                            <strong>{{ stats.total }}</strong>
+                            <span>Appointments</span>
+                        </div>
+                        <div class="mini-stat">
+                            <strong>{{ stats.today_confirmed }}</strong>
+                            <span>Confirmed today</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <div class="row g-4 mb-5">
         <div class="col-md-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <h3 class="display-4 text-primary">{{ stats.total_doctors }}</h3>
-                    <p class="text-muted"><i class="fas fa-user-md me-1"></i> Doctors</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number text-primary">{{ stats.total_doctors }}</div>
+                <div class="stat-label"><i class="fas fa-user-md me-1"></i> Doctors</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <h3 class="display-4 text-success">{{ stats.total_appointments }}</h3>
-                    <p class="text-muted"><i class="fas fa-calendar-check me-1"></i> Total Appointments</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number text-success">{{ stats.total }}</div>
+                <div class="stat-label"><i class="fas fa-calendar-check me-1"></i> Total Appointments</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <h3 class="display-4 text-info">{{ stats.confirmed_today }}</h3>
-                    <p class="text-muted"><i class="fas fa-calendar-day me-1"></i> Today's Confirmed</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number text-info">{{ stats.today_confirmed }}</div>
+                <div class="stat-label"><i class="fas fa-calendar-day me-1"></i> Today's Confirmed</div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <h3 class="display-4 text-warning">{{ stats.pending }}</h3>
-                    <p class="text-muted"><i class="fas fa-clock me-1"></i> Pending</p>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number text-warning">{{ stats.completed }}</div>
+                <div class="stat-label"><i class="fas fa-check-circle me-1"></i> Completed</div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-list me-2"></i> Recent Appointments</h5>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h5><i class="fas fa-list me-2"></i>{% if user.is_authenticated and not is_doctor %}My Appointments{% else %}Appointment Schedule{% endif %}</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover mb-0 schedule-table">
                             <thead>
                                 <tr>
-                                    <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Date</th>
                                     <th>Time</th>
@@ -74,18 +95,19 @@
                             <tbody>
                                 {% for appt in recent_appointments %}
                                 <tr>
-                                    <td>{{ appt.patient.name }}</td>
                                     <td>Dr. {{ appt.doctor.name }}</td>
                                     <td>{{ appt.appointment_date|date:"d/m/Y" }}</td>
                                     <td>{{ appt.appointment_time|time:"h:i A" }}</td>
                                     <td>
-                                        <span class="badge bg-{{ appt.get_status_display_color }}">
+                                        <span class="badge bg-{{ appt.get_status_display_color }} rounded-pill px-3 py-2">
                                             {{ appt.get_status_display }}
                                         </span>
                                     </td>
                                 </tr>
                                 {% empty %}
-                                <tr><td colspan="5" class="text-center text-muted">No appointments yet.</td></tr>
+                                <tr><td colspan="4" class="text-center text-muted py-4">
+                                    {% if user.is_authenticated and not is_doctor %}No appointments booked yet.{% else %}No appointments yet.{% endif %}
+                                </td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -93,25 +115,23 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-user-md me-2"></i> Our Doctors</h5>
+        <div class="col-lg-4">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <h5><i class="fas fa-user-md me-2"></i> Available Doctors</h5>
                 </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
+                <div class="card-body p-0">
+                    <div class="doctor-list">
                         {% for doctor in doctors %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="doctor-row">
+                            <div class="avatar-circle"><i class="fas fa-user-md"></i></div>
                             <div>
                                 <strong>Dr. {{ doctor.name }}</strong><br>
                                 <small class="text-muted">{{ doctor.specialization }}</small>
                             </div>
-                            <span class="badge bg-primary rounded-pill">
-                                {{ doctor.appointments.count }}
-                            </span>
                         </div>
                         {% empty %}
-                        <p class="text-muted">No doctors available.</p>
+                        <p class="text-muted px-3 py-3 mb-0">No doctors available.</p>
                         {% endfor %}
                     </div>
                 </div>

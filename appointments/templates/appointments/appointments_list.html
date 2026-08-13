@@ -4,17 +4,24 @@
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-calendar-check me-2"></i>Appointments</h2>
+        <h2><i class="fas fa-calendar-check me-2"></i>{% if is_doctor %}Appointments{% else %}My Appointments{% endif %}</h2>
         <div>
-            <a href="{% url 'appointments:manual_booking' %}" class="btn btn-primary">
-                <i class="fas fa-calendar-plus me-2"></i>New Booking
+            {% if is_doctor %}
+            <a href="{% url 'appointments:voice_booking' %}" class="btn btn-primary">
+                <i class="fas fa-microphone me-2"></i>New Booking
             </a>
             <a href="{% url 'appointments:export_all_excel' %}" class="btn btn-success">
                 <i class="fas fa-file-excel me-2"></i>Export All
             </a>
+            {% else %}
+            <a href="{% url 'appointments:manual_booking' %}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus me-2"></i>Book New Appointment
+            </a>
+            {% endif %}
         </div>
     </div>
 
+    {% if is_doctor %}
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="get" class="row g-3">
@@ -26,6 +33,7 @@
                         <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
                         <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
                         <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
                         <option value="rescheduled" {% if status_filter == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
                     </select>
                 </div>
@@ -52,11 +60,12 @@
             </form>
         </div>
     </div>
+    {% endif %}
 
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover align-middle">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -66,7 +75,6 @@
                             <th>Time</th>
                             <th>Problem</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -92,35 +100,10 @@
                                 <span class="badge bg-info"><i class="fas fa-microphone"></i></span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <div class="btn-group btn-group-sm">
-                                    {% if is_doctor %}
-                                        {% if appt.status == 'pending' %}
-                                        <form method="post" action="{% url 'appointments:confirm_appointment' appt.id %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-success" title="Confirm">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </form>
-                                        {% endif %}
-                                        {% if appt.status == 'pending' or appt.status == 'confirmed' %}
-                                        <form method="post" action="{% url 'appointments:cancel_appointment' appt.id %}" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger" title="Cancel">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </form>
-                                        {% endif %}
-                                    {% endif %}
-                                    <a href="{% url 'appointments:download_ics' appt.id %}" class="btn btn-info" title="Download ICS">
-                                        <i class="fas fa-calendar-plus"></i>
-                                    </a>
-                                </div>
-                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <i class="fas fa-calendar-alt fa-2x mb-2 d-block"></i>
                                 No appointments found matching your filters.
                             </td>

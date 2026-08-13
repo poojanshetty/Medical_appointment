@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Medical Appointment//mxm.dk//
+BEGIN:VEVENT
+SUMMARY:Appointment: Test User 2 - Dr. Joshi
+DTSTART:20260813T103000
+DTEND:20260813T113000
+DTSTAMP:20260812T164535Z
+DESCRIPTION:\n        Patient: Test User 2\n        Age: 30\n        Gende
+ r: Female\n        Problem: Need checkup\n        Contact: 9876543210 | ne
+ wbooking123@example.com\n        
+LOCATION:Medical Clinic
+ORGANIZER;CN="Medical Appointment":MAILTO:pooja.ai.appointment@gmail.com
+END:VEVENT
+END:VCALENDAR

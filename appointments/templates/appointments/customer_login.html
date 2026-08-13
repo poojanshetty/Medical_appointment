@@ -1,0 +1,40 @@
+{% extends 'appointments/base.html' %}
+{% block title %}Customer Login - Medical Appointment{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-5 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h4 class="mb-0"><i class="fas fa-user me-2"></i> Customer Login</h4>
+                </div>
+                <div class="card-body p-4">
+                    {% if form.errors %}
+                    <div class="alert alert-danger">Incorrect customer username or password.</div>
+                    {% endif %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Customer Username</label>
+                            <input type="text" name="username" class="form-control" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <input type="hidden" name="next" value="{{ next }}">
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">Login as Customer</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small>New customer? <a href="{% url 'appointments:customer_register' %}">Create account</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

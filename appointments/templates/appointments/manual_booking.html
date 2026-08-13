@@ -27,36 +27,11 @@
                             </select>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Your Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Age <span class="text-danger">*</span></label>
-                                <input type="number" name="age" min="1" max="150" class="form-control" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">Gender <span class="text-danger">*</span></label>
-                                <select name="gender" class="form-select" required>
-                                    <option value="">--</option>
-                                    <option value="M">Male</option>
-                                    <option value="F">Female</option>
-                                    <option value="O">Other</option>
-                                </select>
-                            </div>
+                        {% if user.is_authenticated and not is_doctor %}
+                        <div class="alert alert-light border mb-3">
+                            <strong>Booking for:</strong> {{ user.get_full_name|default:user.username }}
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Phone <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" class="form-control" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control" required>
-                            </div>
-                        </div>
+                        {% endif %}
 
                         <div class="mb-3">
                             <label class="form-label">Problem / Reason for Visit <span class="text-danger">*</span></label>

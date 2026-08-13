@@ -96,6 +96,10 @@ def get_appointment_stats():
     completed = Appointment.objects.filter(status='completed').count()
     cancelled = Appointment.objects.filter(status='cancelled').count()
     today_appointments = Appointment.objects.filter(appointment_date=today).count()
+    today_confirmed = Appointment.objects.filter(
+        appointment_date=today,
+        status='confirmed'
+    ).count()
 
     return {
         'total': total,
@@ -104,6 +108,7 @@ def get_appointment_stats():
         'completed': completed,
         'cancelled': cancelled,
         'today': today_appointments,
+        'today_confirmed': today_confirmed,
         'total_doctors': Doctor.objects.filter(is_active=True).count(),
     }
 
